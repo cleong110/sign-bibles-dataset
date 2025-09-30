@@ -205,3 +205,5 @@ webdataset
 *.parquet
 *.pkl
 *.pdf
+
+wandb/
