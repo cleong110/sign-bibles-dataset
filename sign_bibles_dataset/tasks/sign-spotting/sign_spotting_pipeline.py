@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+import logging
 import random
 from pathlib import Path
 
@@ -11,6 +12,20 @@ import pyarrow.dataset as ds
 import wandb
 from scipy.signal import find_peaks
 from tqdm.autonotebook import tqdm
+
+# ---------------------------------------------------------------------
+# Logging configuration (works cleanly in Jupyter)
+# ---------------------------------------------------------------------
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%H:%M:%S",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
 
 
 def parse_file(df: pd.DataFrame, column_to_parse="file") -> pd.DataFrame:
@@ -74,9 +89,9 @@ def match_predictions(
     n_null_gt = gt_df["Sign"].isna().sum()
 
     if n_null_preds > 0:
-        print(f"Warning: Dropping {n_null_preds} predictions with null Sign")
+        logger.info(f"Warning: Dropping {n_null_preds} predictions with null Sign")
     if n_null_gt > 0:
-        print(f"Warning: Dropping {n_null_gt} ground truth entries with null Sign")
+        logger.info(f"Warning: Dropping {n_null_gt} ground truth entries with null Sign")
 
     preds_df = preds_df[preds_df["Sign"].notna()].copy()
     gt_df = gt_df[gt_df["Sign"].notna()].copy()
@@ -191,9 +206,9 @@ def get_window_size_values_with_all_titles(dataset, target_title_count: int = 10
         window_df = dataset.to_table(filter=ds_filter).to_pandas()
         window_df = parse_and_edit_title(window_df)
         title_count = len(window_df["title"].unique())
-        print(f"{window_size_ms}: {len(window_df)} rows, {len(window_df['title'].unique())}")
+        logger.info(f"{window_size_ms}: {len(window_df)} rows, {len(window_df['title'].unique())}")
         if title_count == target_title_count:
-            # print(f"Keeping {window_size_ms} ms")
+            # logger.info(f"Keeping {window_size_ms} ms")
             window_size_values_with_all_titles.append(window_size_ms)
 
     # # window_embeddings_df = pd.concat(collector)
@@ -286,7 +301,7 @@ if __name__ == "__main__":
     osb_glosses_truth_df = osb_glosses_truth_df[osb_glosses_truth_df["Sign"].notna()].copy()
     n_null_signs = len(osb_glosses_truth_df) - len(osb_glosses_truth_df[osb_glosses_truth_df["Sign"].notna()])
     if n_null_signs > 0:
-        print(f"Filtered out {n_null_signs} ground truth entries with null Sign")
+        logger.info(f"Filtered out {n_null_signs} ground truth entries with null Sign")
 
     # --- hyperparameter grids ---
     # height_multipliers = [1.0, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5]
@@ -384,10 +399,10 @@ if __name__ == "__main__":
     random.shuffle(distances)
     distances = distances[:20]
 
-    print(f"{height_multipliers=}")
-    print(f"{prominences=}")
-    print(f"{distances=}")
-    print(f"{widths=}")
+    logger.info(f"{height_multipliers=}")
+    logger.info(f"{prominences=}")
+    logger.info(f"{distances=}")
+    logger.info(f"{widths=}")
 
     match_window_ms = 1000
     # example_counts = [1, 5, 10, 15, 25]
@@ -412,15 +427,17 @@ if __name__ == "__main__":
     # available_window_sizes = [600, 600, 600, 600, 600, 600, *available_window_sizes]
     # available_window_sizes = [s for s in available_window_sizes if s <= 3000]
     random.shuffle(available_window_sizes)
-    print(f"{available_window_sizes=}")
+    logger.info(f"{available_window_sizes=}")
 
     runs_per_window_size = 20
 
     for embedding_window_ms in tqdm(available_window_sizes, desc="Embedding window sweep"):
         for example_count in tqdm(example_counts, desc="Example Count sweep"):
+            # load fresh every run
             window_embeddings_df = load_window_embeddings_df(dataset=dataset, window_size_ms=embedding_window_ms)
             # --- generate results_df for this embedding window, with this many examples. ---
             results = []
+            sample_sizes = []  # collect per-sign n_sample values
             for (cbt_number, cbt_video_type), file_gt_df in osb_glosses_truth_df.groupby(
                 ["cbt_number", "cbt_video_type"]
             ):
@@ -447,6 +464,19 @@ if __name__ == "__main__":
                     sign_scores = sign_embeddings @ file_window_embeddings_array.T
                     mean_scores = sign_scores.mean(axis=0)
 
+                    # record sign sampling
+                    sample_sizes.append(
+                        {
+                            "Sign": sign,
+                            "cbt_number": cbt_number,
+                            "cbt_video_type": cbt_video_type,
+                            "example_count_requested": example_count,
+                            "available_samples_count": n_sign_df,
+                            "n_sample_used": n_sample,
+                            "sign_df_len_after_sampling": len(sign_df),
+                        }
+                    )
+
                     for idx, score in enumerate(mean_scores):
                         results.append(
                             {
@@ -465,7 +495,9 @@ if __name__ == "__main__":
             results_df = pd.DataFrame(results)
             if results_df.empty:
                 continue
-            print(f"Got {len(results_df)} results")
+            logger.info(f"Got {len(results_df)} results")
+
+            sample_sizes_df = pd.DataFrame(sample_sizes)
 
             # --- sweep over hyperparameters, including thresholding ---
             hyperparam_combos = list(
@@ -479,8 +511,17 @@ if __name__ == "__main__":
                 hyperparam_combos, desc=f"Threshold sweep for {embedding_window_ms}ms"
             ):
                 sampling_records: list[dict[str, int | str]] = []
-                print(height_multiplier, prominence, width, example_count, thresholding, distance)
-                print(f"{width=}")
+                logger.info(
+                    "height_multiplier=%s, prominence=%s, width=%s, example_count=%s, thresholding=%s, distance=%s",
+                    height_multiplier,
+                    prominence,
+                    width,
+                    example_count,
+                    thresholding,
+                    distance,
+                )
+
+                logger.info(f"{width=}")
                 run = wandb.init(
                     project="sign-bibles-matching",
                     config={
@@ -624,6 +665,8 @@ if __name__ == "__main__":
                 ]
 
                 # --- Log to W&B ---
+                run.log({"sampling_info": wandb.Table(dataframe=sample_sizes_df)})
+
                 run.log({"grouped_sign_metrics": wandb.Table(dataframe=sign_micro_df)})
 
                 run.finish()
