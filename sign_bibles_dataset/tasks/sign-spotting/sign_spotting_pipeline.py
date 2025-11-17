@@ -299,7 +299,9 @@ if __name__ == "__main__":
     dataset = ds.dataset(window_embeddings_folder, format="parquet", partitioning="hive")
     # Filter out null signs from ground truth at the start
     osb_glosses_truth_df = osb_glosses_truth_df[osb_glosses_truth_df["Sign"].notna()].copy()
-    n_null_signs = len(osb_glosses_truth_df) - len(osb_glosses_truth_df[osb_glosses_truth_df["Sign"].notna()])
+    n_null_signs = len(osb_glosses_truth_df) - len(
+        osb_glosses_truth_df[osb_glosses_truth_df["Sign"].notna()]
+    )  # TODO: fix this Futurewarning
     if n_null_signs > 0:
         logger.info(f"Filtered out {n_null_signs} ground truth entries with null Sign")
 
@@ -319,7 +321,7 @@ if __name__ == "__main__":
     # height_multipliers = list(np.random.uniform(low=1.15, high=1.25, size=20))
     height_multipliers = [1.2132332381708744]
     random.shuffle(height_multipliers)
-    # height_multipliers = height_multipliers[:20]
+    height_multipliers = height_multipliers[:20]
 
     # prominences = [0.5, 0.6, 0.7, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 10.0, 100.0, 1000.0]
     # prominences = list(np.arange(0.1, 100.0, 0.1))
@@ -366,7 +368,7 @@ if __name__ == "__main__":
     # widths = list(np.random.uniform(low=0.0, high=60, size=20))
     widths = [4.103367281005972]
     random.shuffle(widths)
-    # widths = [*widths[:20], None]
+    widths = [*widths[:20], None]
 
     # distances = [
     #     1,
@@ -394,10 +396,10 @@ if __name__ == "__main__":
     # distances = list(np.linspace(11.0, 20.0, 100))
     # distances = [i + 1 for i in range(43)]
     # distances = [i + 1 for i in range(11)]  # must be greater than 1, should be an integer
-    # distances = list(np.random.uniform(low=0.0, high=1e15,size=20))
+    # distances = list(np.random.uniform(low=0.0, high=1e15, size=20))
     distances = [37]
     random.shuffle(distances)
-    distances = distances[:20]
+    distances = [*distances[:20], None]
 
     logger.info(f"{height_multipliers=}")
     logger.info(f"{prominences=}")
@@ -409,6 +411,8 @@ if __name__ == "__main__":
     example_counts = list(range(1, 29))
     # example_counts = [25]
     random.shuffle(example_counts)
+    # example_counts = example_counts[:5]
+
     thresholdings = ["all-gloss", "per-gloss"]
     # thresholdings = ["all-gloss"]
     random.shuffle(thresholdings)
@@ -425,11 +429,11 @@ if __name__ == "__main__":
     # available_window_sizes = [s for s in available_window_sizes if s not in [10000, 9000, 5000]]
     # available_window_sizes = [s for s in available_window_sizes if s in [1400]]
     # available_window_sizes = [600, 600, 600, 600, 600, 600, *available_window_sizes]
-    # available_window_sizes = [s for s in available_window_sizes if s <= 3000]
+    available_window_sizes = [s for s in available_window_sizes if s <= 3000]
     random.shuffle(available_window_sizes)
     logger.info(f"{available_window_sizes=}")
 
-    runs_per_window_size = 20
+    runs_per_window_size = 2  # actually per window size and example count
 
     for embedding_window_ms in tqdm(available_window_sizes, desc="Embedding window sweep"):
         for example_count in tqdm(example_counts, desc="Example Count sweep"):
@@ -574,6 +578,7 @@ if __name__ == "__main__":
                                 distance=distance,
                             )
                             per_gloss_collector.append(sign_peaks)
+                        # TODO: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
                         peaks_df = (
                             pd.concat(per_gloss_collector)
                             if per_gloss_collector
