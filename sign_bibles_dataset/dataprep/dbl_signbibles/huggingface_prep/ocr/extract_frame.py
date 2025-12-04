@@ -122,6 +122,11 @@ def parse_args():
         default="subfolder",
         help="Where to save extracted frames",
     )
+    # parser.add_argument(
+    #     "--crop-face-with-pose",
+    #     action="store_true",
+    #     help="If specified, will look for a .pose file in the same folder and use that for the bbox."
+    # )
     parser.add_argument(
         "--output_path",
         type=Path,
