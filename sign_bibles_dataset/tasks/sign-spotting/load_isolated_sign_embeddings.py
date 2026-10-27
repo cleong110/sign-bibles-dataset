@@ -1,0 +1,1 @@
+# C:\Users\Colin Leong\data\isolated_sign_embeddings\embeddings

@@ -316,12 +316,18 @@ if __name__ == "__main__":
     # height_multipliers = list(np.linspace(1.16, 1.28, 30))
     # height_multipliers = list(np.arange(1.21, 1.25, 0.001))
     # height_multipliers = list(np.linspace(1.21, 1.23, 100))
-    # height_multipliers = list(np.random.uniform(low=0.0, high=1.5, size=25))
-    # height_multipliers = list(np.random.uniform(low=0.0, high=1.40, size=20))
-    # height_multipliers = list(np.random.uniform(low=1.15, high=1.25, size=20))
-    height_multipliers = [1.2132332381708744]
+    # height_multipliers = list(np.random.uniform(low=1.2, high=1.25, size=25))
+    height_multipliers = list(np.random.uniform(low=0.0, high=1.5, size=25))
+    # height_multipliers = list(np.random.uniform(low=0.0, high=1.40, size=25))
+    # height_multipliers = list(np.random.uniform(low=0.0, high=1.1, size=25))
+    # height_multipliers = list(np.random.uniform(low=1.0, high=1.40, size=25))
+    # height_multipliers = list(np.random.uniform(low=1.15, high=1.25, size=25))
+    # height_multipliers = list(np.random.uniform(low=1.13, high=1.15, size=25))
+    # height_multipliers = list(np.random.uniform(low=1.202, high=1.246, size=25))
+    # height_multipliers = list(np.random.uniform(low=1.20, high=1.22, size=25))
+    # height_multipliers = [1.2132332381708744]
     random.shuffle(height_multipliers)
-    height_multipliers = height_multipliers[:20]
+    height_multipliers = height_multipliers[:25]
 
     # prominences = [0.5, 0.6, 0.7, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 10.0, 100.0, 1000.0]
     # prominences = list(np.arange(0.1, 100.0, 0.1))
@@ -342,9 +348,11 @@ if __name__ == "__main__":
     # prominences = list(np.logspace(-3, 2, 200)) # not much point going past 10^2, F1 hits zero around 50
     # prominences = list(np.linspace(0.0, 30.0, 100))
     # prominences = list(np.linspace(19.0, 22.0, 100))
-    # prominences = list(np.random.uniform(low=0.0, high=50, size=20))
-    # prominences = list(np.random.uniform(low=0.0, high=29, size=20))
-    prominences = [1.6130612744069568]
+    prominences = list(np.random.uniform(low=0.0, high=50, size=20))
+    # prominences = list(np.random.uniform(low=0.0, high=40, size=20))
+    # prominences = list(np.random.uniform(low=0.0, high=24, size=20))
+    # prominences = list(np.random.uniform(low=0.0, high=3.0, size=10))
+    # prominences = [1.6130612744069568]
     random.shuffle(prominences)
     prominences = [*prominences[:20], None]
 
@@ -363,12 +371,13 @@ if __name__ == "__main__":
     # widths = list(np.linspace(0.0, 6.952, 200))
     # widths = list(np.random.uniform(low=0.0, high=50, size=20))
     # widths = list(np.random.uniform(low=0.0, high=30, size=20))
-    # widths = list(np.random.uniform(low=0.0, high=14, size=20))
-    # widths = list(np.random.uniform(low=0.0, high=60, size=20))
-    # widths = list(np.random.uniform(low=0.0, high=60, size=20))
-    widths = [4.103367281005972]
+    # widths = list(np.random.uniform(low=0.0, high=10, size=20))
+    widths = list(np.random.uniform(low=0.0, high=70, size=25))
+    # widths = list(np.random.uniform(low=0.0, high=65, size=20))
+    # widths = list(np.random.uniform(low=0.0, high=5, size=10))
+    # widths = [4.103367281005972]
     random.shuffle(widths)
-    widths = [*widths[:20], None]
+    widths = [*widths[:25], None]
 
     # distances = [
     #     1,
@@ -383,7 +392,7 @@ if __name__ == "__main__":
     # distances = list(np.logspace(0.1, 3.0, 100))
     # distances = list(np.logspace(0.1, 6.0, 200))
     # distances = list(np.logspace(0.1, 10.0, 200))
-    # distances = list(np.logspace(0.1, 10.0, 200))
+    # distances = list(np.logspace(0.0, 15.0, 20))
     # distances = list(np.logspace(0.0, 2.0, 20)) # 1 to 100
     # distances = list(np.logspace(0.0, 4.0, 200)) # 1 to 10_000
     # distances = list(np.logspace(0.0, 5.0, 200))  # 1 to 100_000
@@ -396,8 +405,13 @@ if __name__ == "__main__":
     # distances = list(np.linspace(11.0, 20.0, 100))
     # distances = [i + 1 for i in range(43)]
     # distances = [i + 1 for i in range(11)]  # must be greater than 1, should be an integer
-    # distances = list(np.random.uniform(low=0.0, high=1e15, size=20))
-    distances = [37]
+    # distances = list(np.random.uniform(low=1.0, high=10, size=20))
+    # distances = list(np.random.uniform(low=1.0, high=1e15, size=20))
+    # distances = list(np.random.uniform(low=1.0, high=1e13, size=20))
+    # distances = list(np.random.uniform(low=1.0, high=1500, size=20))
+    # distances = list(np.random.uniform(low=1.0, high=100, size=20))
+    distances = list(np.random.uniform(low=1.0, high=85.0, size=10))
+    # distances = [37]
     random.shuffle(distances)
     distances = [*distances[:20], None]
 
@@ -407,11 +421,13 @@ if __name__ == "__main__":
     logger.info(f"{widths=}")
 
     match_window_ms = 1000
-    # example_counts = [1, 5, 10, 15, 25]
-    example_counts = list(range(1, 29))
+
+    example_counts = list(range(1, 30))  # some glosses have only 29
+    # example_counts = [1, 5, 10, 15, 29]
+    # example_counts = list(range(1, 5))
     # example_counts = [25]
     random.shuffle(example_counts)
-    # example_counts = example_counts[:5]
+    # example_counts = example_counts[:10]
 
     thresholdings = ["all-gloss", "per-gloss"]
     # thresholdings = ["all-gloss"]
@@ -429,11 +445,12 @@ if __name__ == "__main__":
     # available_window_sizes = [s for s in available_window_sizes if s not in [10000, 9000, 5000]]
     # available_window_sizes = [s for s in available_window_sizes if s in [1400]]
     # available_window_sizes = [600, 600, 600, 600, 600, 600, *available_window_sizes]
-    available_window_sizes = [s for s in available_window_sizes if s <= 3000]
+    # available_window_sizes = [s for s in available_window_sizes if s <= 3000]
+    # available_window_sizes = [650]
     random.shuffle(available_window_sizes)
     logger.info(f"{available_window_sizes=}")
 
-    runs_per_window_size = 2  # actually per window size and example count
+    runs_per_window_size = 10  # actually per window size and example count
 
     for embedding_window_ms in tqdm(available_window_sizes, desc="Embedding window sweep"):
         for example_count in tqdm(example_counts, desc="Example Count sweep"):
@@ -524,8 +541,6 @@ if __name__ == "__main__":
                     thresholding,
                     distance,
                 )
-
-                logger.info(f"{width=}")
                 run = wandb.init(
                     project="sign-bibles-matching",
                     config={
